@@ -303,6 +303,18 @@ input,select,textarea{font:inherit;color:inherit}
 .exo.skipped .eh h3{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--graphite)}
 .exo.skipped .hint{display:none}
 .skipnote{font-size:12.5px;color:var(--warn);width:100%;margin-bottom:4px}
+.pace{font-size:12px;color:var(--graphite);margin-top:9px;font-family:var(--mono);letter-spacing:-.02em}
+.pace span{font-weight:600}
+.exsig{padding-left:42px}
+.exdelta{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;margin-top:9px;
+  padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--graphite) 16%,transparent)}
+.exdelta.up{background:color-mix(in srgb,var(--ok) 16%,transparent)}
+.exdelta.down{background:color-mix(in srgb,var(--danger) 14%,transparent)}
+.stagnote{margin-top:9px;font-size:12.5px;color:var(--graphite);line-height:1.6;
+  padding:11px 14px;border-radius:var(--r-field);
+  background:color-mix(in srgb,var(--warn) 11%,transparent);
+  border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+.stagnote b{color:var(--warn);font-weight:600}
 .seedrow{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .sname{flex:1;min-width:150px;font-size:14.5px;font-weight:500}
 .srange{display:block;font-family:var(--mono);font-size:11px;color:var(--graphite);margin-top:3px}
@@ -327,6 +339,18 @@ input,select,textarea{font:inherit;color:inherit}
 .exo.skipped .eh h3{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--graphite)}
 .exo.skipped .hint{display:none}
 .skipnote{font-size:12.5px;color:var(--warn);width:100%;margin-bottom:4px}
+.pace{font-size:12px;color:var(--graphite);margin-top:9px;font-family:var(--mono);letter-spacing:-.02em}
+.pace span{font-weight:600}
+.exsig{padding-left:42px}
+.exdelta{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;margin-top:9px;
+  padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--graphite) 16%,transparent)}
+.exdelta.up{background:color-mix(in srgb,var(--ok) 16%,transparent)}
+.exdelta.down{background:color-mix(in srgb,var(--danger) 14%,transparent)}
+.stagnote{margin-top:9px;font-size:12.5px;color:var(--graphite);line-height:1.6;
+  padding:11px 14px;border-radius:var(--r-field);
+  background:color-mix(in srgb,var(--warn) 11%,transparent);
+  border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+.stagnote b{color:var(--warn);font-weight:600}
 .seedrow{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .sname{flex:1;min-width:150px;font-size:14.5px;font-weight:500}
 .srange{display:block;font-family:var(--mono);font-size:11px;color:var(--graphite);margin-top:3px}
@@ -425,14 +449,14 @@ const store={
 };
 const DEFAULTS={
   settings:{ startMonday:'2026-08-10', bodyweight:71.05, autoRest:true, sound:true,
-             bar:20, plates:[25,20,15,10,5,2.5,1.25], pairs:{25:4,20:4,15:4,10:4,5:4,2.5:2,1.25:2}, dbMin:2, dbMax:50, dbStep:2, coach:true, theme:'auto', wake:true },
+             bar:20, plates:[25,20,15,10,5,2.5,1.25], pairs:{25:4,20:4,15:4,10:4,5:4,2.5:2,1.25:2}, dbMin:2, dbMax:50, dbStep:2, coach:true, ownK:true, theme:'auto', wake:true },
   blocks:0, logs:{}, exNotes:{}, seed:{}, lastExport:0, v:2
 };
 const RAW=store.read()||{};
 let S=Object.assign({},DEFAULTS,RAW);
 S.settings=Object.assign({},DEFAULTS.settings,S.settings||{});
 S.logs=S.logs||{}; S.exNotes=S.exNotes||{}; S.seed=S.seed||{};
-const save=()=>store.write(S);
+const save=()=>{ KFIT=null; store.write(S) };
 
 /* ═══════════ blocs générés ═══════════ */
 const BASE_W=WEEKS.length;
@@ -513,7 +537,43 @@ const kg=(v)=>fmt(v,v%1?(v*100%10?2:1):0);
 const cap=(s)=>s.charAt(0).toUpperCase()+s.slice(1);
 const todayISO=()=>new Date().toISOString().slice(0,10);
 const restSec=(r)=>{const s=String(r);if(s.includes('min'))return parseFloat(s)*60;if(s.includes('sec'))return parseFloat(s);return 0};
-const e1rm=(w,r)=>w>0&&r>0?w*(1+r/30):0;
+let KFIT=null;
+function fitK(){
+  /* Chaque séance fournit des couples charge/reps sur un même exercice, typiquement
+     un top set lourd et un back-off plus léger. À force égale, les deux doivent donner
+     le même maximum estimé : on en déduit le coefficient k de la formule w×(1+r/k).
+     On prend la médiane de tous les couples, ce qui écarte les séries ratées. */
+  const ks=[];
+  Object.keys(S.logs).forEach(lk=>{
+    const [w,si]=lk.split('|').map(Number), log=S.logs[lk];
+    if(!SESSIONS[si]) return;
+    const byName={};
+    SESSIONS[si].ex.forEach(ex=>{
+      if(isSkipped(log,ex)) return;
+      const n=dispName(log,ex);
+      for(let i=0;i<MAXSETS;i++){
+        const st=log.sets[setKey(ex,i)]; if(!st||!st.done) continue;
+        const kg0=num(st.kg), r=num(st.reps);
+        if(kg0>0&&r>0&&r<=20) (byName[n]||(byName[n]=[])).push({kg:kg0,r});
+      }
+    });
+    Object.values(byName).forEach(arr=>{
+      for(let a=0;a<arr.length;a++) for(let b=a+1;b<arr.length;b++){
+        const A=arr[a].kg>=arr[b].kg?arr[a]:arr[b], B=arr[a].kg>=arr[b].kg?arr[b]:arr[a];
+        if(A.kg-B.kg<0.5 || B.r-A.r<2) continue;
+        const k=(B.kg*B.r-A.kg*A.r)/(A.kg-B.kg);
+        if(k>=10&&k<=60) ks.push(k);
+      }
+    });
+  });
+  if(ks.length<8) return {k:30,n:ks.length,fitted:false};
+  ks.sort((a,b)=>a-b);
+  const m=ks.length%2?ks[(ks.length-1)/2]:(ks[ks.length/2-1]+ks[ks.length/2])/2;
+  return {k:Math.round(m*10)/10,n:ks.length,fitted:true};
+}
+function kInfo(){ if(KFIT===null) KFIT=fitK(); return KFIT }
+function kCoef(){ const i=kInfo(); return (S.settings.ownK!==false && i.fitted)?i.k:30 }
+const e1rm=(w,r)=>w>0&&r>0?w*(1+r/kCoef()):0;
 const mmss=(s)=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const MAXSETS=14;
 const isDeload=(w)=>/DÉCHARGE/i.test((WEEKS[w]&&WEEKS[w].phase)||'');
@@ -619,6 +679,56 @@ function sessionStatus(w,si){
 }
 const STATUS={done:['faite',''],started:['en cours',''],today:['aujourd’hui',''],late:['à rattraper','late'],todo:['à venir','']};
 const toDoThisWeek=(w)=>SESSIONS.map((_,si)=>({si,st:sessionStatus(w,si)})).filter(x=>x.st!=='done');
+
+function livePace(w,si,only){
+  const log=getLog(w,si); if(!log) return null;
+  const pw=prevWeekOf(w,si); if(pw===w) return null;
+  const plog=getLog(pw,si); if(!plog) return null;
+  let now=0, ref=0; const seen=new Set();
+  SESSIONS[si].ex.forEach(ex=>{
+    if(isSkipped(log,ex)) return;
+    if(only && exKey(ex)!==only) return;
+    for(let i=0;i<MAXSETS;i++){
+      const a=log.sets[setKey(ex,i)], b=plog.sets[setKey(ex,i)];
+      if(!a||!a.done||!b||!b.done) continue;
+      const na=num(a.kg)*num(a.reps), nb=num(b.kg)*num(b.reps);
+      if(!nb) continue;
+      now+=na; ref+=nb; seen.add(exKey(ex));
+    }
+  });
+  if(!ref) return null;
+  return {now,ref,d:(now-ref)/ref*100,ex:seen.size,w:pw};
+}
+
+/* ── stagnation ─────────────────────────────────────────────────────── */
+function bestByWeek(name){
+  const map={};
+  eachDoneSet((st,n,w)=>{ if(n!==name||isDeload(w)) return;
+    const e=e1rm(num(st.kg),num(st.reps)); if(e>(map[w]||0)) map[w]=e });
+  return Object.keys(map).map(Number).sort((a,b)=>a-b).map(w=>({w,best:map[w]}));
+}
+const STAG_TIPS=[
+  'Change de fourchette : descends de deux répétitions et remonte la charge.',
+  'Change de variante pour le même muscle pendant trois semaines, puis reviens.',
+  'Regarde l’exercice qui précède : c’est peut-être lui qui te vide avant celui-ci.',
+  'Vérifie ton repos. Une minute de plus sur cet exercice suffit parfois à débloquer.'
+];
+function stagnation(name){
+  const pts=bestByWeek(name);
+  if(pts.length<4) return null;
+  const last=pts.slice(-3), before=pts.slice(0,-3);
+  const peakBefore=Math.max(...before.map(p=>p.best));
+  const peakNow=Math.max(...last.map(p=>p.best));
+  if(peakNow>peakBefore*1.005) return null;
+  return {n:last.length, since:before[before.length-1].w, peak:peakBefore, now:peakNow,
+          tip:STAG_TIPS[name.length%STAG_TIPS.length]};
+}
+function allStagnations(){
+  const names=new Set(); eachDoneSet((s,n)=>names.add(n));
+  const out=[];
+  names.forEach(n=>{ const st=stagnation(n); if(st) out.push(Object.assign({name:n},st)) });
+  return out.sort((a,b)=>b.peak-a.peak);
+}
 
 function fatigueSignal(w){
   const rows=[];
@@ -1058,15 +1168,25 @@ function sessionSheet(w,si){
   const head=$(`<div class="shead"><div class="l1">
       <button class="xbtn" aria-label="Fermer">✕</button>
       <h2>${esc(SS.code)}<span>${esc(WEEKS[w].title)} · ${esc(SS.sub)}${shift}</span></h2>
-      <div class="clock">0:00</div></div><div class="bar"><i style="width:0%"></i></div></div>`);
+      <div class="clock">0:00</div></div><div class="bar"><i style="width:0%"></i></div>
+      <div class="pace"></div></div>`);
   head.querySelector('.xbtn').onclick=closeSheet;
   inn.append(head);
 
+  const paceEl=head.querySelector('.pace');
+  const drawPace=()=>{
+    const p=livePace(w,si);
+    if(!p||!p.ex){ paceEl.innerHTML=''; paceEl.style.display='none'; return }
+    paceEl.style.display='block';
+    const cls=p.d>1?'up':p.d<-1?'down':'flat';
+    paceEl.innerHTML=`<span class="${cls}">${p.d>0?'+':''}${fmt(p.d,1)} %</span> sur S${p.w+1}, à séries comparables · ${p.ex} exercice${p.ex>1?'s':''}`;
+  };
   const tick=()=>{
     const st=sessionStats(w,si);
     head.querySelector('.bar i').style.width=(st.planned?Math.min(100,st.sets/st.planned*100):0)+'%';
     head.querySelector('.clock').textContent=mmss((Date.now()-log.started)/1000);
   };
+  drawPace();
   clearInterval(elapsed); elapsed=setInterval(tick,1000);
 
   SS.ex.forEach((ex,ei)=>{
@@ -1084,6 +1204,7 @@ function sessionSheet(w,si){
           <div class="meta">${esc(ex.reps)} reps · <i>repos</i> ${esc(ex.rest)} · <i>RPE</i> ${rpe} · ${esc(ex.tempo)}${wu}</div>
         </div></div>
       ${ex.notes&&!skipped?`<p class="note">${esc(ex.notes)}</p>`:''}
+      <div class="exsig"></div>
       <div class="tools"></div>
       <div class="sets"></div></div>`);
 
@@ -1102,6 +1223,16 @@ function sessionSheet(w,si){
     nameEl.onclick=openHist;
     nameEl.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();openHist()} };
 
+    const sig=box.querySelector('.exsig');
+    if(!skipped){
+      const lp=livePace(w,si,exKey(ex));
+      if(lp&&lp.ex){
+        const cls=lp.d>1?'up':lp.d<-1?'down':'flat';
+        sig.append($(`<div class="exdelta ${cls}">${lp.d>0?'+':''}${fmt(lp.d,1)} % sur S${lp.w+1}</div>`));
+      }
+      const sg=stagnation(name);
+      if(sg) sig.append($(`<div class="stagnote"><b>Tu stagnes depuis ${sg.n} séances.</b> ${esc(sg.tip)}</div>`));
+    }
     const tools=box.querySelector('.tools');
     const drawTools=()=>{
       tools.innerHTML='';
@@ -1379,6 +1510,30 @@ function renderProg(){
       return {label:'S'+(w+1),value:a.length?a.reduce((s,x)=>s+x.v,0)/a.length:0} });
     app().append($('<div class="sec"><h2>Poids de corps</h2><p>Moyenne des pesées de la semaine.</p></div>'));
     app().append(lineChart(byW,v=>fmt(v,1)));
+  }
+
+  const stg=allStagnations();
+  if(stg.length){
+    app().append($('<div class="sec"><h2>Stagnation</h2><p>Aucune progression de force estimée depuis au moins trois séances, semaines de décharge exclues.</p></div>'));
+    const tb=$('<table class="cmp"></table>');
+    stg.forEach(x=>tb.append($(`<tr><td><div class="ex">${esc(x.name)}</div>
+      <div class="de">bloqué autour de ${fmt(x.peak,1)} kg depuis la semaine ${x.since+1}</div>
+      <div class="sml" style="margin-top:6px">${esc(x.tip)}</div></td>
+      <td>${x.n} séances</td></tr>`)));
+    app().append(tb);
+  }
+
+  const ki=kInfo();
+  app().append($('<div class="sec"><h2>Ta formule de force</h2></div>'));
+  if(ki.fitted){
+    app().append($(`<div class="sml">Sur ${ki.n} comparaisons entre tes séries lourdes et tes séries longues, ton coefficient personnel ressort à <b style="color:var(--ink)">${fmt(ki.k,1)}</b>. Ta force estimée se calcule donc par charge × (1 + répétitions ÷ ${fmt(ki.k,1)}), là où la formule d’Epley utilise 30 pour tout le monde. ${ki.k<28?'Tu perds tes répétitions vite quand la charge monte : profil plutôt explosif que résistant.':ki.k>33?'Tu tiens beaucoup de répétitions sous charge : profil endurant, tes séries longues sont proportionnellement plus fortes que tes séries lourdes.':'Tu es très proche de la moyenne.'}</div>`));
+    const t=$(`<div class="field"><label>Formule utilisée</label><div class="chips">
+      <button data-k="1" aria-pressed="${S.settings.ownK!==false}">La mienne</button>
+      <button data-k="0" aria-pressed="${S.settings.ownK===false}">Epley</button></div></div>`);
+    t.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.settings.ownK=b.dataset.k==='1';save();render()});
+    app().append(t);
+  } else {
+    app().append($(`<div class="sml">Il faut au moins huit comparaisons entre une série lourde et une série longue du même exercice dans la même séance pour calculer ton coefficient. Tu en as ${ki.n}. Tes top sets et tes back-off sets les fabriquent tout seuls : la formule d’Epley reste utilisée en attendant.</div>`));
   }
 
   const rec=allRecords(), rk=Object.keys(rec).sort((a,b)=>rec[b].e-rec[a].e);
