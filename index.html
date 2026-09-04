@@ -17,6 +17,7 @@
 <style>
 /* ═══════════ Grenat — jetons ═══════════ */
 :root{
+  --ind:42px;
   --bx:#720004;                    /* accent, ne bouge jamais */
   --bx-ink:#FFFFFF;                /* encre sur tuile pleine bordeaux */
   --bg:#F8F5F5;
@@ -199,12 +200,12 @@ input,select,textarea{font:inherit;color:inherit}
   background:color-mix(in srgb,var(--graphite) 20%,transparent);color:var(--graphite);margin-left:8px;vertical-align:2px;font-family:var(--ui)}
 .tag.top{background:var(--bx);color:var(--bx-ink)}
 .tag.drop{background:color-mix(in srgb,var(--danger) 18%,transparent);color:var(--danger)}
-.note{color:var(--graphite);font-size:13px;margin:10px 0 0;padding-left:42px;max-width:60ch}
-.setup{padding-left:42px;margin-top:10px}
+.note{color:var(--graphite);font-size:13px;margin:10px 0 0;padding-left:var(--ind);max-width:60ch}
+.setup{padding-left:var(--ind);margin-top:10px}
 .setupbtn{color:var(--graphite);font-size:12.5px;background:var(--field);border:1px solid var(--field-brd);
   border-radius:999px;padding:8px 14px;text-align:left;max-width:100%}
 
-.sets{margin:14px 0 0;padding-left:42px}
+.sets{margin:14px 0 0;padding-left:var(--ind)}
 .hd{display:grid;grid-template-columns:22px 1fr 1fr 62px 46px;gap:8px;color:var(--graphite);
   font-family:var(--mono);font-size:10px;padding:0 2px 6px}
 .set{display:grid;grid-template-columns:22px 1fr 1fr 62px 46px;gap:8px;align-items:center;margin-bottom:8px}
@@ -225,7 +226,7 @@ input,select,textarea{font:inherit;color:inherit}
 .goal{color:var(--bx);font-weight:600;font-size:11.5px;border-bottom:1.5px dotted;padding:0}
 .why{opacity:.7}
 .plates{display:block;font-family:var(--mono);font-size:10.5px;margin-top:2px;opacity:.85}
-.addset{margin:4px 0 14px 42px;color:var(--graphite);font-size:13px;padding:8px 0}
+.addset{margin:4px 0 14px var(--ind);color:var(--graphite);font-size:13px;padding:8px 0}
 
 .rest{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--solid);
   border-top:1px solid var(--line);padding:14px 18px calc(16px + env(safe-area-inset-bottom));
@@ -235,13 +236,7 @@ input,select,textarea{font:inherit;color:inherit}
 .rest .lbl{flex:1;color:var(--graphite);font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rest button{padding:11px 15px;border-radius:var(--r-btn);background:var(--solid-2);font-size:13.5px;font-weight:500}
 .rest .prog{position:absolute;left:0;top:0;height:2px;background:var(--bx)}
-.finish{position:fixed;left:0;right:0;bottom:0;z-index:75;padding:14px 18px calc(16px + env(safe-area-inset-bottom));
-  background:linear-gradient(to top,var(--bg) 46%,transparent);
-  /* la zone dégradée est transparente : elle ne doit pas intercepter les touches
-     destinées à la dernière série, seul le bouton reste cliquable */
-  pointer-events:none}
-.finish .in{max-width:640px;margin:0 auto;pointer-events:none}
-.finish .cta{pointer-events:auto}
+.endbtn{margin:30px 0 8px}
 
 /* ═══════════ bilan ═══════════ */
 .big{font-family:var(--sig);font-weight:700;font-size:clamp(40px,11.5vw,60px);line-height:1;letter-spacing:-.05em}
@@ -278,7 +273,7 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* ═══════════ données ═══════════ */
 .chart{width:100%;height:auto;display:block;margin-top:14px;overflow:visible}
-.chart text{font-family:var(--mono);font-size:9.5px;fill:var(--graphite)}
+.chart text{font-family:var(--mono);font-size:15px;fill:var(--graphite)}
 .vol{margin-top:10px}
 .vrow{display:grid;grid-template-columns:92px 1fr 62px;gap:12px;align-items:center;padding:8px 0;font-size:13.5px}
 .vbar{height:10px;border-radius:999px;overflow:hidden;display:flex;background:transparent}
@@ -302,14 +297,14 @@ input,select,textarea{font:inherit;color:inherit}
   background:var(--solid);border:1px solid var(--line);box-shadow:var(--shadow-sm)}
 .notice b{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
 .notice span{font-size:13.5px;color:var(--graphite);line-height:1.6}
-.tools{padding-left:42px;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.tools{padding-left:var(--ind);margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 .exo.skipped{opacity:.6}
 .exo.skipped .eh h3{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--graphite)}
 .exo.skipped .hint{display:none}
 .skipnote{font-size:12.5px;color:var(--warn);width:100%;margin-bottom:4px}
 .pace{font-size:12px;color:var(--graphite);margin-top:9px;font-family:var(--mono);letter-spacing:-.02em}
 .pace span{font-weight:600}
-.exsig{padding-left:42px}
+.exsig{padding-left:var(--ind)}
 .exdelta{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;margin-top:9px;
   padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--graphite) 16%,transparent)}
 .exdelta.up{background:color-mix(in srgb,var(--ok) 16%,transparent)}
@@ -338,14 +333,14 @@ input,select,textarea{font:inherit;color:inherit}
   background:var(--solid);border:1px solid var(--line);box-shadow:var(--shadow-sm)}
 .notice b{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
 .notice span{font-size:13.5px;color:var(--graphite);line-height:1.6}
-.tools{padding-left:42px;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.tools{padding-left:var(--ind);margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 .exo.skipped{opacity:.6}
 .exo.skipped .eh h3{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--graphite)}
 .exo.skipped .hint{display:none}
 .skipnote{font-size:12.5px;color:var(--warn);width:100%;margin-bottom:4px}
 .pace{font-size:12px;color:var(--graphite);margin-top:9px;font-family:var(--mono);letter-spacing:-.02em}
 .pace span{font-weight:600}
-.exsig{padding-left:42px}
+.exsig{padding-left:var(--ind)}
 .exdelta{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;margin-top:9px;
   padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--graphite) 16%,transparent)}
 .exdelta.up{background:color-mix(in srgb,var(--ok) 16%,transparent)}
@@ -392,6 +387,46 @@ input,select,textarea{font:inherit;color:inherit}
 .hbest{font-family:var(--mono);font-size:11px;color:var(--bx);margin-top:8px}
 
 /* ═══════════ responsive ═══════════ */
+@media (max-width:600px){
+  :root{--ind:0px}
+  #app{padding:0 15px}
+  .sheet .in{padding:0 15px var(--botpad,60px)}
+  .hero{padding:22px 19px 20px}
+  .sec{margin:24px 0 10px}
+  .exo{padding:20px 0 8px}
+  .eh{gap:10px}
+  .letter{width:24px;height:24px;font-size:11.5px}
+  .eh h3{font-size:16px}
+  .exname .hint{display:none}
+  .meta{font-size:11.5px}
+  .prev{padding-left:26px;font-size:11px}
+  .set,.hd{grid-template-columns:18px 1fr 1fr 52px 44px;gap:6px}
+  .set input{padding:12px 4px;font-size:15.5px}
+  .hd{font-size:9px}
+  .tick{height:44px}
+  .facts{gap:18px}
+  .fact .v{font-size:19px}
+  .shead{padding:12px 0 10px}
+  .shead h2{font-size:16.5px}
+  .shead .clock{font-size:14px}
+  .xbtn{width:34px;height:34px}
+  .rest{padding:11px 15px calc(13px + env(safe-area-inset-bottom))}
+  .rest .in{gap:10px}
+  .rest .cd{font-size:27px;min-width:76px}
+  .rest .lbl{display:none}
+  .rest button{padding:10px 12px;font-size:13px}
+  .vrow{grid-template-columns:78px 1fr 54px;gap:9px;font-size:12.5px}
+  .tab{font-size:10px}
+  .toast{bottom:92px;font-size:13px}
+  .modal{padding:20px 16px calc(24px + env(safe-area-inset-bottom))}
+  .big{font-size:clamp(38px,12vw,52px)}
+  .grid4{gap:8px}
+  .box{padding:12px 13px}
+  .box .v{font-size:19px}
+  .cmp{font-size:13px}
+  .seedrow{gap:10px}
+  .sin{grid-template-columns:76px 84px;gap:8px}
+}
 @media (min-width:560px){
   .grid4{grid-template-columns:repeat(4,1fr)}
   .set,.hd{grid-template-columns:26px 1fr 1fr 72px 52px;gap:10px}
@@ -416,8 +451,8 @@ input,select,textarea{font:inherit;color:inherit}
   .sheet{left:var(--side)}
   .sheet .in{max-width:800px;padding:0 40px var(--botpad,220px)}
   .shead{padding-top:24px}
-  .rest .in,.finish .in{max-width:800px;padding:0 40px}
-  .rest,.finish{left:var(--side)}
+  .rest .in{max-width:800px;padding:0 40px}
+  .rest{left:var(--side)}
   .set,.hd{grid-template-columns:28px 1fr 1fr 84px 56px;gap:12px}
   .row:hover{border-color:color-mix(in srgb,var(--bx) 30%,transparent)}
   .toast{bottom:34px}
@@ -1119,10 +1154,9 @@ function renderWeek(){
 
 /* ═══════════ marge basse : les bandeaux fixes ne doivent rien cacher ═══════════ */
 function adjustBottomPad(){
-  const fin=document.querySelector('.sheet .finish');
   const rest=document.getElementById('resttimer');
-  const h=(fin?fin.offsetHeight:0)+(rest?rest.offsetHeight:0)+56;
-  document.documentElement.style.setProperty('--botpad', Math.max(180,h)+'px');
+  const h=(rest?rest.offsetHeight:0)+28;
+  document.documentElement.style.setProperty('--botpad', h+'px');
 }
 window.addEventListener('resize',adjustBottomPad);
 
@@ -1170,9 +1204,9 @@ function seedSheet(){
       inn.append(row);
     });
   });
-  const fin=$('<div class="finish"><div class="in"><button class="cta">Terminer</button></div></div>');
-  fin.querySelector('button').onclick=()=>{ closeSheet(); toast('Charges de départ enregistrées') };
-  el.append(fin);
+  const fin=$('<button class="cta endbtn">Terminer</button>');
+  fin.onclick=()=>{ closeSheet(); toast('Charges de départ enregistrées') };
+  inn.append(fin);
   return el;
 }
 function closeSheet(){ stopTimer(); keepAwake(false); clearInterval(elapsed); elapsed=null; sheet=null; render() }
@@ -1282,12 +1316,12 @@ function sessionSheet(w,si){
     inn.append(box);
   });
 
-  const fin=$('<div class="finish"><div class="in"><button class="cta">Terminer et voir le bilan</button></div></div>');
-  fin.querySelector('button').onclick=()=>{
+  const fin=$('<button class="cta endbtn">Terminer et voir le bilan</button>');
+  fin.onclick=()=>{
     log.finished=Date.now(); save(); stopTimer(); keepAwake(false);
-    sheet={type:'report',w,si}; render(); window.scrollTo(0,0);
+    sheet={type:'report',w,si}; render();
   };
-  el.append(fin);
+  inn.append(fin);
   setTimeout(()=>{ tick();
     const first=el.querySelector('.set:not(.done)');
     if(first&&el.querySelector('.set.done')) first.scrollIntoView({block:'center',behavior:'smooth'});
@@ -1573,21 +1607,21 @@ function renderProg(){
 }
 
 function barChart(data,fmtV){
-  const W=600,H=180,pad=28,max=Math.max(...data.map(d=>d.value))||1,bw=(W-pad*2)/data.length;
+  const W=600,H=196,pad=26,max=Math.max(...data.map(d=>d.value))||1,bw=(W-pad*2)/data.length;
   let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">`;
   s+=`<line x1="${pad}" y1="${H-26}" x2="${W-pad}" y2="${H-26}" stroke="currentColor" opacity=".18"/>`;
   data.forEach((d,i)=>{
     const h=d.value/max*(H-62), x=pad+i*bw+bw*.19, y=H-26-h;
     s+=`<rect x="${x}" y="${y}" width="${bw*.62}" height="${Math.max(h,d.value?2:0)}" rx="4"
         fill="${d.value?'var(--bx)':'currentColor'}" ${d.value?'':'opacity=".16"'}/>`;
-    if(d.value) s+=`<text x="${x+bw*.31}" y="${y-7}" text-anchor="middle">${fmtV(d.value)}</text>`;
-    s+=`<text x="${x+bw*.31}" y="${H-9}" text-anchor="middle" opacity=".8">${d.label}</text>`;
+    if(d.value&&data.length<=12) s+=`<text x="${x+bw*.31}" y="${y-9}" text-anchor="middle">${fmtV(d.value)}</text>`;
+    if(data.length<=12||i%2===0) s+=`<text x="${x+bw*.31}" y="${H-8}" text-anchor="middle" opacity=".75">${d.label}</text>`;
   });
   return $(s+'</svg>');
 }
 function lineChart(data,fmtV){
   fmtV=fmtV||(v=>fmt(v,0));
-  const W=600,H=186,pad=32;
+  const W=600,H=200,pad=30;
   const vals=data.map(d=>d.value).filter(v=>v>0);
   const max=Math.max(...vals)*1.06||1, min=Math.min(...vals)*.94||0;
   const X=i=>pad+i*((W-pad*2)/Math.max(1,data.length-1));
@@ -1600,9 +1634,9 @@ function lineChart(data,fmtV){
   data.forEach((d,i)=>{
     if(d.value>0){
       s+=`<circle cx="${X(i)}" cy="${Y(d.value)}" r="4" fill="var(--bg)" stroke="var(--bx)" stroke-width="2.4"/>`;
-      s+=`<text x="${X(i)}" y="${Y(d.value)-11}" text-anchor="middle">${fmtV(d.value)}</text>`;
+      if(data.length<=12) s+=`<text x="${X(i)}" y="${Y(d.value)-13}" text-anchor="middle">${fmtV(d.value)}</text>`;
     }
-    s+=`<text x="${X(i)}" y="${H-10}" text-anchor="middle" opacity=".8">${d.label}</text>`;
+    if(data.length<=12||i%2===0) s+=`<text x="${X(i)}" y="${H-9}" text-anchor="middle" opacity=".75">${d.label}</text>`;
   });
   return $(s+'</svg>');
 }
