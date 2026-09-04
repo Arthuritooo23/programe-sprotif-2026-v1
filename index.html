@@ -175,7 +175,7 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* ═══════════ séance (surface pleine, jamais de verre) ═══════════ */
 .sheet{position:fixed;inset:0;background:var(--bg);z-index:70;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.sheet .in{max-width:640px;margin:0 auto;padding:0 18px 220px}
+.sheet .in{max-width:640px;margin:0 auto;padding:0 18px var(--botpad,260px)}
 .shead{position:sticky;top:0;z-index:5;background:var(--bg);padding:16px 0 12px;border-bottom:1px solid var(--line)}
 .shead .l1{display:flex;align-items:center;gap:14px}
 .shead h2{flex:1;font-size:18.5px;font-weight:600;min-width:0}
@@ -225,7 +225,7 @@ input,select,textarea{font:inherit;color:inherit}
 .goal{color:var(--bx);font-weight:600;font-size:11.5px;border-bottom:1.5px dotted;padding:0}
 .why{opacity:.7}
 .plates{display:block;font-family:var(--mono);font-size:10.5px;margin-top:2px;opacity:.85}
-.addset{margin:4px 0 6px 42px;color:var(--graphite);font-size:13px;padding:8px 0}
+.addset{margin:4px 0 14px 42px;color:var(--graphite);font-size:13px;padding:8px 0}
 
 .rest{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--solid);
   border-top:1px solid var(--line);padding:14px 18px calc(16px + env(safe-area-inset-bottom));
@@ -410,7 +410,7 @@ input,select,textarea{font:inherit;color:inherit}
   .two{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:start}
   .hero{margin-top:18px}
   .sheet{left:var(--side)}
-  .sheet .in{max-width:800px;padding:0 40px 180px}
+  .sheet .in{max-width:800px;padding:0 40px var(--botpad,220px)}
   .shead{padding-top:24px}
   .rest .in,.finish .in{max-width:800px;padding:0 40px}
   .rest,.finish{left:var(--side)}
@@ -1113,12 +1113,25 @@ function renderWeek(){
     <span><i class="f-todo" style="background:color-mix(in srgb,var(--graphite) 46%,transparent)"></i>reste à faire</span></div>`));
 }
 
+/* ═══════════ marge basse : les bandeaux fixes ne doivent rien cacher ═══════════ */
+function adjustBottomPad(){
+  const fin=document.querySelector('.sheet .finish');
+  const rest=document.getElementById('resttimer');
+  const h=(fin?fin.offsetHeight:0)+(rest?rest.offsetHeight:0)+56;
+  document.documentElement.style.setProperty('--botpad', Math.max(180,h)+'px');
+}
+window.addEventListener('resize',adjustBottomPad);
+
 /* ═══════════ séance ═══════════ */
 let timer=null,timerEnd=0,timerTotal=0,elapsed=null;
 function renderSheet(){
+  const y=layer().querySelector('.sheet')?layer().querySelector('.sheet').scrollTop:null;
   layer().innerHTML='';
   if(sheet.type==='seed') layer().append(seedSheet());
   else layer().append(sheet.type==='session'?sessionSheet(sheet.w,sheet.si):reportSheet(sheet.w,sheet.si));
+  const el=layer().querySelector('.sheet');
+  if(el&&y!=null) el.scrollTop=y;
+  requestAnimationFrame(adjustBottomPad);
 }
 
 function seedSheet(){
@@ -1336,6 +1349,7 @@ function setRow(w,si,ei,i,ex,tick){
   const commit=()=>{ const o=log.sets[key]||(log.sets[key]={}); o.reps=ins[0].value;o.kg=ins[1].value;o.rpe=ins[2].value; save() };
   ins.forEach((x,k)=>{
     x.oninput=commit;
+    x.onfocus=()=>setTimeout(()=>{ try{ row.scrollIntoView({block:'center',behavior:'smooth'}) }catch(e){} },260);
     x.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault();
       if(k<2) ins[k+1].focus(); else row.querySelector('.tick').click() } };
   });
@@ -1383,7 +1397,7 @@ function startTimer(sec,label){
     <button data-a="30">+30 s</button><button data-a="skip">Passer</button></div></div>`);
   el.querySelector('[data-a="30"]').onclick=()=>{timerEnd+=3e4;timerTotal+=30};
   el.querySelector('[data-a="skip"]').onclick=stopTimer;
-  el.id='resttimer'; document.body.append(el);
+  el.id='resttimer'; document.body.append(el); requestAnimationFrame(adjustBottomPad);
   timer=setInterval(()=>{
     const left=(timerEnd-Date.now())/1000;
     el.querySelector('.cd').textContent=mmss(left);
@@ -1391,7 +1405,7 @@ function startTimer(sec,label){
     if(left<=0){ beep(); stopTimer() }
   },200);
 }
-function stopTimer(){ clearInterval(timer); timer=null; const e=document.getElementById('resttimer'); if(e)e.remove() }
+function stopTimer(){ clearInterval(timer); timer=null; const e=document.getElementById('resttimer'); if(e)e.remove(); requestAnimationFrame(adjustBottomPad) }
 function beep(){
   if(navigator.vibrate) navigator.vibrate([130,90,130]);
   if(!S.settings.sound) return;
