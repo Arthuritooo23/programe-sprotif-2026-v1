@@ -25,7 +25,7 @@
   --graphite:#8A7B76;              /* couleur compagne, secondaire */
   --ok:#3F6B52; --warn:#9A6100; --danger:#B5450F;
 
-  --glass:rgba(255,255,255,.60);
+  --glass:#FFFFFF;
   --glass-brd:rgba(114,0,4,.11);
   --solid:#FFFFFF;
   --solid-2:#F1EBEB;
@@ -51,7 +51,7 @@
   --graphite:#B9A9A3;
   --ok:#7BC49A; --warn:#F0B429; --danger:#FF8A5B;
 
-  --glass:rgba(255,255,255,.055);
+  --glass:#1D1113;
   --glass-brd:rgba(239,80,104,.17);
   --solid:#1D1113;
   --solid-2:#241618;
@@ -75,13 +75,7 @@ body{
   overscroll-behavior-y:none; min-height:100vh;
 }
 /* lueurs de fond — fixes, jamais animées */
-.glowfield{
-  position:fixed; inset:0; z-index:-1; pointer-events:none;
-  background:
-    radial-gradient(58vw 46vw at 88% -8%, var(--glow-a), transparent 62%),
-    radial-gradient(52vw 40vw at -12% 12%, var(--glow-b), transparent 60%),
-    radial-gradient(64vw 50vw at 40% 108%, var(--glow-a), transparent 66%);
-}
+.glowfield{display:none}
 h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.028em;line-height:1.12}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;letter-spacing:inherit}
 input,select,textarea{font:inherit;color:inherit}
@@ -107,7 +101,6 @@ input,select,textarea{font:inherit;color:inherit}
 /* ═══════════ surfaces ═══════════ */
 .card{
   background:var(--glass);
-  -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5);
   border:1px solid var(--glass-brd); border-radius:var(--r-card);
   box-shadow:var(--shadow);
 }
@@ -145,9 +138,7 @@ input,select,textarea{font:inherit;color:inherit}
 .signal span{font-size:13.5px;color:var(--ink);opacity:.85}
 
 .strip{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:20px 0 6px}
-.dcell{border:1px solid var(--glass-brd);border-radius:var(--r-field);padding:10px 3px;text-align:center;background:var(--glass);
-  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-.dcell .dn{font-family:var(--mono);font-size:10.5px;color:var(--graphite)}
+.dcell{border:1px solid var(--glass-brd);border-radius:var(--r-field);padding:10px 3px;text-align:center;background:var(--glass);font-size:10.5px;color:var(--graphite)}
 .dcell .dc{font-size:11px;font-weight:600;margin-top:5px;color:var(--graphite);line-height:1.2;min-height:26px;display:flex;align-items:center;justify-content:center}
 .dcell.has .dc{color:var(--ink)}
 .dcell.done{background:var(--bx);border-color:var(--bx)}
@@ -161,7 +152,7 @@ input,select,textarea{font:inherit;color:inherit}
 
 .row{
   display:flex;align-items:center;gap:14px;padding:15px 17px;margin-bottom:9px;
-  background:var(--glass);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  background:var(--glass);
   border:1px solid var(--glass-brd);border-radius:var(--r-field);width:100%;text-align:left;
   box-shadow:var(--shadow-sm);transition:transform .12s ease
 }
@@ -236,7 +227,7 @@ input,select,textarea{font:inherit;color:inherit}
 .rest .lbl{flex:1;color:var(--graphite);font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rest button{padding:11px 15px;border-radius:var(--r-btn);background:var(--solid-2);font-size:13.5px;font-weight:500}
 .rest .prog{position:absolute;left:0;top:0;height:2px;background:var(--bx)}
-.endbtn{margin:30px 0 8px}
+.endbtn{margin:34px 0 20px}
 
 /* ═══════════ bilan ═══════════ */
 .big{font-family:var(--sig);font-weight:700;font-size:clamp(40px,11.5vw,60px);line-height:1;letter-spacing:-.05em}
@@ -244,7 +235,7 @@ input,select,textarea{font:inherit;color:inherit}
 .delta{font-size:14.5px;font-weight:500;margin-top:12px;max-width:56ch}
 .up{color:var(--ok)} .down{color:var(--danger)} .flat{color:var(--graphite)}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:20px}
-.box{background:var(--glass);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+.box{background:var(--glass);
   border:1px solid var(--glass-brd);border-radius:var(--r-field);padding:15px 16px}
 .box .v{font-family:var(--mono);font-size:21px;font-weight:600;letter-spacing:-.04em}
 .box .k{color:var(--graphite);font-size:12px;margin-top:3px}

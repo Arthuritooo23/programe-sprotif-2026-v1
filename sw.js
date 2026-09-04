@@ -1,5 +1,5 @@
 /* Carnet — cache hors-ligne */
-const CACHE = 'carnet-v13';
+const CACHE = 'carnet-v14';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
